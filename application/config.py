@@ -18,7 +18,7 @@ class AppConfig :
         self.apps[self.appList[0]]['login_form_password'] = 'okta-signin-password'
         self.apps[self.appList[0]]['login_form_submit'] = 'okta-signin-submit'
         self.apps[self.appList[0]]['username'] = 'hugues.kisitankebi@belfius.be'
-        self.apps[self.appList[0]]['password'] = 'Kinshasa162'
+        self.apps[self.appList[0]]['password'] = '************'
         
         
         #KEYCLOAK
@@ -28,7 +28,7 @@ class AppConfig :
         self.apps[self.appList[1]]['login_form_password'] = 'password'
         self.apps[self.appList[1]]['login_form_submit'] = 'kc-login'
         self.apps[self.appList[1]]['username'] = 'hugues.kisitankebi@belfius.be'
-        self.apps[self.appList[1]]['password'] = 'Kinshasa162'
+        self.apps[self.appList[1]]['password'] = '************'
         
         
         #MITREID
