@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 
 
@@ -17,8 +18,8 @@ class AppConfig :
         self.apps[self.appList[0]]['login_form_username'] = 'okta-signin-username'
         self.apps[self.appList[0]]['login_form_password'] = 'okta-signin-password'
         self.apps[self.appList[0]]['login_form_submit'] = 'okta-signin-submit'
-        self.apps[self.appList[0]]['username'] = 'hugues.kisitankebi@belfius.be'
-        self.apps[self.appList[0]]['password'] = '************'
+        self.apps[self.appList[0]]['username'] = os.environ['OKTA_USERNAME']
+        self.apps[self.appList[0]]['password'] = os.environ['OKTA_PASSWORD']
         
         
         #KEYCLOAK
@@ -27,8 +28,8 @@ class AppConfig :
         self.apps[self.appList[1]]['login_form_username'] = 'username'
         self.apps[self.appList[1]]['login_form_password'] = 'password'
         self.apps[self.appList[1]]['login_form_submit'] = 'kc-login'
-        self.apps[self.appList[1]]['username'] = 'hugues.kisitankebi@belfius.be'
-        self.apps[self.appList[1]]['password'] = '************'
+        self.apps[self.appList[1]]['username'] = os.environ['KEYCLOAK_USERNAME']
+        self.apps[self.appList[1]]['password'] = os.environ['KEYCLOAK_PASSWORD']
         
         
         #MITREID
@@ -37,14 +38,14 @@ class AppConfig :
         self.apps[self.appList[2]]['login_form_username'] = 'j_username'
         self.apps[self.appList[2]]['login_form_password'] = 'j_password'
         self.apps[self.appList[2]]['login_form_submit'] = 'submit'
-        self.apps[self.appList[2]]['username'] = 'admin'
-        self.apps[self.appList[2]]['password'] = 'password'
+        self.apps[self.appList[2]]['username'] = os.environ['MITREID_USERNAME']
+        self.apps[self.appList[2]]['password'] = os.environ['MITREID_PASSWORD']
         
         
         #OIDC RP Docker
-        self.oidc_rp[self.appList[0]]['repository'] = '/home/firebase/server/'+ self.appList[0]
-        self.oidc_rp[self.appList[1]]['repository'] = '/home/firebase/server/'+ self.appList[0]
-        self.oidc_rp[self.appList[2]]['repository'] = '/home/firebase/server/'+ self.appList[0]
+        self.oidc_rp[self.appList[0]]['repository'] = os.getcwd() + '/../server'
+        self.oidc_rp[self.appList[1]]['repository'] = os.getcwd() + '/../server'
+        self.oidc_rp[self.appList[2]]['repository'] = os.getcwd() + '/../server'
         
         
         

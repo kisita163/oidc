@@ -64,9 +64,6 @@ class TestOidcOkta(unittest.TestCase):
         self.startOidcRp()
         self.driver    = webdriver.Firefox()
         
-    
-    
-        
 
     def test_authz_requet_url(self):
         
@@ -122,6 +119,8 @@ class TestOidcOkta(unittest.TestCase):
         
         response = requests.get('http://localhost:7011/getLastResponse')
         
+        time.sleep(1)
+        
         resp = response.text
         resp = resp.replace("\'", "\"")
         resp = json.loads(resp)
@@ -136,9 +135,6 @@ class TestOidcOkta(unittest.TestCase):
         self.assertIn('id_token', response.text)
         self.assertIn('nationalRegistryNumber', response.text)
         
-        
-        
-
 
     def tearDown(self):
         self.driver.close()
