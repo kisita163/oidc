@@ -1,9 +1,14 @@
+import requests
+import jwt
+import json
+
 from oic.oic.message import AuthorizationResponse
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 from oic.oauth2.exception import GrantError
 from oic.oic import Client
 from oic import rndstr
 from urllib.parse import urlencode
+
 
 
 class Oidc_rp :
@@ -20,6 +25,8 @@ class Oidc_rp :
         self.client.client_secret = client_secret
         self.client.provider_config(client_provider_issuer)
         self.client.redirect_uris = client_redirect_uri
+        self.redirect_uri = client_redirect_uri
+        
         self.session = {}
     
     def getAuthnRequestUrl(self):
@@ -30,7 +37,7 @@ class Oidc_rp :
             "response_type": "code",
             "scope": "openid profile",
             "nonce": self.session["nonce"],
-            "redirect_uri": self.client.redirect_uris,
+            "redirect_uri": self.redirect_uri,
             "state": self.session["state"],
             "client_id": self.client.client_id
         }
@@ -63,24 +70,49 @@ class Oidc_rp :
         return error,code,state
     
     
+    def jwtHandler(self,token_response):
+        
+        tokens = json.loads(token_response)
+        
+        
+        if 'error' in tokens : 
+            return token_response
+        
+        
+        if 'access_token' in tokens :
+            access_token = jwt.decode(tokens['access_token'],verify=False)
+            tokens['access_token'] = access_token
+            print(json.dumps(tokens,indent=2))
+        
+        if 'id_token' in tokens : 
+            id_token = jwt.decode(tokens['id_token'],verify=False)
+            tokens['id_token'] = id_token
+            print(json.dumps(tokens,indent=2))
+        
+        return json.dumps(tokens,indent=2)
+        
+        
+    
     
     def doAccessTokenRequest(self,code):
         
-        resp = None
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+        }
         args = {
             "code": code,
-            "grant_type" : "authorization_code"
+            "grant_type" : "authorization_code",
+            "client_id" : self.client.client_id,
+            "client_secret" : self.client.client_secret,
+            "redirect_uri":self.redirect_uri
             }
         
-        try :
-            resp = self.client.do_access_token_request(state=self.session["state"],
-                                      request_args=args)
-           
-        except GrantError:
-            print("No grant found for state: " + self.session["state"])
+        resp = requests.post(self.client.token_endpoint,headers=headers,data=urlencode(args))
         
-        self.last_response = resp
-        return resp
+        response  = self.jwtHandler(resp.content.decode('utf-8'))
+        
+        return response
             
     def getLastResponse(self):
         return self.last_response
