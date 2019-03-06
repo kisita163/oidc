@@ -28,6 +28,7 @@ class Oidc_rp :
         self.redirect_uri = client_redirect_uri
         
         self.session = {}
+        self.last_response = {}
     
     def getAuthnRequestUrl(self):
         
@@ -111,6 +112,7 @@ class Oidc_rp :
         resp = requests.post(self.client.token_endpoint,headers=headers,data=urlencode(args))
         
         response  = self.jwtHandler(resp.content.decode('utf-8'))
+        self.last_response = response
         
         return response
             
