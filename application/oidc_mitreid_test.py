@@ -2,9 +2,10 @@ import unittest
 import requests
 import json
 import time
-from docker import Client
-from application.config import AppConfig
-from selenium import webdriver
+import pytest
+
+from oidc_test import BaseAppTest
+
 
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,87 +15,40 @@ from jsonschema._utils import indent
 
 
 
-class TestOidcOkta(unittest.TestCase):
+class TestOidcMitreid(BaseAppTest):
     
-    def startOidcRp(self):
-        #port mapping
-        ports = [8080]
-        port_bindings = {8080: 7011}
-        #Environment variables
-        environment = ['CONFIG='+str(self.index)]
-        #Network mode
-        network_mode='host'
-
-        #New docker client
-        self.client = Client()
-        #Build the container
-        path = self.appConfig.getRpConfig(self.index)['repository']
-        tag  = self.appConfig.getRpConfig(self.index)['tag']
-          
-        output  = self.client.build(path=path, 
-                                    tag=tag) 
-        #New container logs
-        for t in output : print(t)
-        assert('Successfully' in str(t))
-        
-        
-        host_config = self.client.create_host_config(port_bindings=port_bindings,
-                                                     network_mode=network_mode)
-        
-        container = self.client.create_container(
-            image=tag,
-            ports=ports,
-            host_config=host_config,
-            environment=environment,
-        )
-        self.client.start(container)
-        
-        self.oidc_rp_id = container['Id']
-        
-        print('Starting container ' + self.oidc_rp_id)
-        #Give the container the chance to start
-        for n in range(0,9) : 
-            print('*')
-            time.sleep(1)
-    
-    def stopOidcRp(self):
-        print('Stopping ' + self.oidc_rp_id )
-        self.client.stop(self.oidc_rp_id)
-        self.client.close()
-    
-    
-
     def setUp(self):
-        #OIDC Provider
         self.index = 2
-        self.appConfig = AppConfig()
-        self.startOidcRp()
-        self.driver    = webdriver.Firefox()
-        
+        self.startOidcRp(self.index)
+        super().setUp()
     
-    
-        
 
+    @pytest.mark.order1
     def test_authz_requet_url(self):
         
         print('Start test_authz_requet_url')
         
         response = requests.get('http://localhost:7011/authorization-request/url')
         
-        self.assertIn('redirect_uri=http', response.text)
-        self.assertIn('response_type', response.text)
-        self.assertIn('client_id', response.text)
-        self.assertIn('scope', response.text)
+        authz_req_url = response.text
+        
+        self.assertIn('redirect_uri=http',authz_req_url)
+        self.assertIn('response_type',authz_req_url)
+        self.assertIn('client_id',authz_req_url)
+        self.assertIn('scope', authz_req_url)
+        
+        
         
         print(response.text)
     
     
-    
+    @pytest.mark.order2
     def test_login_screen(self): 
         
-        print('Start test_login_screen')
+        print('Start test_login_screen ')
         
         response = requests.get('http://localhost:7011/authorization-request/url')
+        #
         #start the browser with the provider URL
         self.driver.get(response.text)
         
@@ -130,12 +84,6 @@ class TestOidcOkta(unittest.TestCase):
         self.assertIn('expires_in', response.text)
         self.assertIn('scope', response.text)
         self.assertIn('id_token', response.text)
-        
-
-
-    def tearDown(self):
-        self.driver.close()
-        self.stopOidcRp()
        
         
         

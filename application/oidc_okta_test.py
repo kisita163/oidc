@@ -2,67 +2,24 @@ import unittest
 import requests
 import json
 import time
+import pytest
 from docker import Client
 from config import AppConfig
 from selenium import webdriver
+
+from oidc_test import BaseAppTest
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 
-class TestOidcOkta(unittest.TestCase):
+class TestOidcOkta(BaseAppTest):
     
-    def startOidcRp(self):
-        #port mapping
-        ports = [7011]
-        port_bindings = {7011: 7011}
-        #Environment variables
-        environment = ['CONFIG='+str(self.index)]
-
-        #New docker client
-        self.client = Client()
-        #Build the container
-        path = self.appConfig.getRpConfig(self.index)['repository']
-        tag  = self.appConfig.getRpConfig(self.index)['tag']
-          
-        output  = self.client.build(path=path, 
-                                    tag=tag) 
-        #New container logs
-        for t in output : print(t)
-        assert('Successfully' in str(t))
-        
-        
-        host_config = self.client.create_host_config(port_bindings=port_bindings)
-
-        container = self.client.create_container(
-            image=tag,
-            ports=ports,
-            host_config=host_config,
-            environment=environment
-        )
-        self.client.start(container)
-        
-        self.oidc_rp_id = container['Id']
-        
-        print('Starting container ' + self.oidc_rp_id)
-        #Give the container the chance to start
-        for n in range(0,9) : 
-            print('*')
-            time.sleep(1)
-    
-    def stopOidcRp(self):
-        print('Stopping ' + self.oidc_rp_id )
-        self.client.stop(self.oidc_rp_id)
-        self.client.close()
-    
-    
-
     def setUp(self):
         #OIDC Provider
         self.index = 0
-        self.appConfig = AppConfig()
-        self.startOidcRp()
-        self.driver    = webdriver.Firefox()
+        self.startOidcRp(self.index)
+        super().setUp()
         
 
     def test_authz_requet_url(self):
@@ -75,10 +32,6 @@ class TestOidcOkta(unittest.TestCase):
         self.assertIn('response_type', response.text)
         self.assertIn('client_id', response.text)
         self.assertIn('scope', response.text)
-        
-        print(response.text)
-    
-    
     
 
     def login(self):
@@ -115,11 +68,11 @@ class TestOidcOkta(unittest.TestCase):
         
         assert(self.login())
         
-        time.sleep(5)
+        time.sleep(10)
         
         response = requests.get('http://localhost:7011/getLastResponse')
         
-        time.sleep(1)
+        time.sleep(5)
         
         resp = response.text
         resp = resp.replace("\'", "\"")
@@ -135,11 +88,6 @@ class TestOidcOkta(unittest.TestCase):
         self.assertIn('id_token', response.text)
         self.assertIn('nationalRegistryNumber', response.text)
         
-
-    def tearDown(self):
-        self.driver.close()
-        self.stopOidcRp()
-       
         
         
 if __name__ == "__main__":
