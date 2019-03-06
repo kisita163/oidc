@@ -15,7 +15,7 @@
 	{
 		"client_id":"63c6ee4e-a0c3-4e1c-9e8a-afbfc24cf917",
 		"client_secret":"AIVJ7Gck8ex_XqSn9x2Q5PX4jNg-33L7EyhKVO5IaFYDBhAlHGKSAGRCn6hdR9sIF4Y7SevGjzaxoQfS4nuP-JU",
-		"issuer":"http://localhost:8080/openid-connect-server-webapp/",
+		"issuer":"https://mitreid.org/",
 		"redirect_uri":"http://localhost:7011/authorization-code/callback"
 	}
 ]
