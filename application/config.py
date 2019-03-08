@@ -10,7 +10,7 @@ class AppConfig :
         self.apps   = defaultdict(dict)
         self.oidc_rp= defaultdict(dict)
 
-        self.appList = ['okta','keycloak','mitreid']
+        self.appList = ['okta','test_keycloak','mitreid']
         
         #OKTA
         self.apps[self.appList[0]]['login_form_id'] = 'form17'
@@ -43,8 +43,8 @@ class AppConfig :
         
         
         #OIDC RP Docker
-        self.oidc_rp[self.appList[0]]['repository'] = os.getcwd() + '/../server'
-        self.oidc_rp[self.appList[1]]['repository'] = os.getcwd() + '/../server'
+        self.oidc_rp[self.appList[0]]['repository'] = os.getcwd() + '/../../server'
+        self.oidc_rp[self.appList[1]]['repository'] = os.getcwd() + '/../../server'
         self.oidc_rp[self.appList[2]]['repository'] = os.getcwd() + '/../server'
         
         

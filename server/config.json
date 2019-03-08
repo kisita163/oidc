@@ -7,8 +7,8 @@
 	},
 	
 	{
-                "client_id":"cassie",
-                "client_secret":"ac1ef396-2ca3-4be3-b558-f792e5d8f68a",
+                "client_id":"cassie-test",
+                "client_secret":"EEt9>NY$?9c%&[E.",
                 "issuer":"http://localhost:7010/auth/realms/master/",
                 "redirect_uri":"http://localhost:7011/authorization-code/callback"
         },

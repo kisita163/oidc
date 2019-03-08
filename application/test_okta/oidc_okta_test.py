@@ -2,14 +2,10 @@ import unittest
 import requests
 import json
 import time
-import pytest
-from docker import Client
-from config import AppConfig
-from selenium import webdriver
+
 
 from oidc_test import BaseAppTest
 
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 
@@ -19,12 +15,11 @@ class TestOidcOkta(BaseAppTest):
         #OIDC Provider
         self.index = 0
         self.startOidcRp(self.index)
-        super().setUp()
+        super(TestOidcOkta,self).setUp()
         
-
     def test_authz_requet_url(self):
         
-        print('Start test_authz_requet_url')
+        print('Testing authorization request URL ...')
         
         response = requests.get('http://localhost:7011/authorization-request/url')
         
@@ -33,42 +28,18 @@ class TestOidcOkta(BaseAppTest):
         self.assertIn('client_id', response.text)
         self.assertIn('scope', response.text)
     
-
-    def login(self):
-        #Return value
-        status = True
-        # Get Authentication URL from OP
-        response = requests.get('http://localhost:7011/authorization-request/url')
-        self.driver.get(response.text)
-        print(response.text)
-        
-        
-        time.sleep(5)
-        try:
-            self.driver.find_element_by_id(self.appConfig.getAppConfig(self.index)['login_form_username']).send_keys(self.appConfig.getAppConfig(self.index)['username'])
-            self.driver.find_element_by_id(self.appConfig.getAppConfig(self.index)['login_form_password']).send_keys(self.appConfig.getAppConfig(self.index)['password'])
-            self.driver.find_element_by_id(self.appConfig.getAppConfig(self.index)['login_form_submit']).click()
-            
-        except NoSuchElementException:
-            status = False
-            pass
-            
-            
-        return status
-
     def test_login_screen(self): 
         
         print('Start test_login_screen')
         
-        assert(self.login())
+        assert(self.login(self.index))
         
         
-     
-    def test_access_token(self):   
+    def test_access_token_with_custom_claim(self):   
         
-        assert(self.login())
+        assert(self.login(self.index))
         
-        time.sleep(10)
+        time.sleep(5)
         
         response = requests.get('http://localhost:7011/getLastResponse')
         

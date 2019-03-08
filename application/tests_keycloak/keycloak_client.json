@@ -1,0 +1,21 @@
+{
+	"clientId":"cassie-test",
+	"name":"cassie-test",
+	"secret":"EEt9>NY$?9c%&[E.",
+	"redirectUris":["http://localhost:7011/authorization-code/callback"],
+	"bearerOnly":false,
+	"consentRequired":false,
+	
+	"attributes": {},
+    "defaultClientScopes": [
+        "profile"
+      ],
+    "clientAuthenticatorType": "client-secret",
+    "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "nrn"
+      ]
+    
+}

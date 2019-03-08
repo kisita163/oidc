@@ -20,7 +20,7 @@ class TestOidcMitreid(BaseAppTest):
     def setUp(self):
         self.index = 2
         self.startOidcRp(self.index)
-        super().setUp()
+        super(TestOidcMitreid,self).setUp()
     
 
     @pytest.mark.order1
