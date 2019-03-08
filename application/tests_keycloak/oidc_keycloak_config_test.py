@@ -1,10 +1,7 @@
 import os
 import json
-import time
-
 
 from docker import Client
-from keycloak import KeycloakAdmin
 from oidc_test import BaseAppTest
 
 
@@ -38,6 +35,7 @@ class KeycloakBaseTest(BaseAppTest):
         
         print('Starting container ' + self.oidc_rp_id)
         #Give the container the chance to start
+        self.waiContainerRunning(image)
 
             
     def stopKeycloakAuthorizationServer(self):
@@ -60,5 +58,13 @@ class KeycloakBaseTest(BaseAppTest):
         
         return data
 
+    def setUp(self):
+        self.startKeycloakAuthorizationServer()
+        BaseAppTest.setUp(self)
+        
+    def tearDown(self):
+        self.stopKeycloakAuthorizationServer()
+        BaseAppTest.tearDown(self)
+        
 
     
