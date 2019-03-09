@@ -8,14 +8,19 @@
 	
 	"attributes": {},
     "defaultClientScopes": [
-        "profile"
+        "profile",
+        "nrn"
       ],
     "clientAuthenticatorType": "client-secret",
     "optionalClientScopes": [
         "address",
         "phone",
         "offline_access",
-        "nrn"
-      ]
+        "nrn",
+        "ara"
+      ],
+      
+      
+     "description":"Belfius OIDC Authorization server"
     
 }

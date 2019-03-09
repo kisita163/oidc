@@ -31,6 +31,9 @@ def getUserInfo():
 def getLastResponse():
     return str(rp.getLastResponse())
 
+@app.route('/home')
+def getHome():
+    return 'OK'
 
 def loadServerConf(config):
     

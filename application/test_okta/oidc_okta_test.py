@@ -5,6 +5,7 @@ import time
 
 
 from oidc_test import BaseAppTest
+from selenium import webdriver
 
 
 
@@ -15,6 +16,7 @@ class TestOidcOkta(BaseAppTest):
         #OIDC Provider
         self.index = 0
         self.startOidcRp(self.index)
+        self.driver = webdriver.Firefox()
         super(TestOidcOkta,self).setUp()
         
     def test_authz_requet_url(self):
@@ -58,6 +60,10 @@ class TestOidcOkta(BaseAppTest):
         self.assertIn('scope', response.text)
         self.assertIn('id_token', response.text)
         self.assertIn('nationalRegistryNumber', response.text)
+        
+    def tearDown(self):
+        self.driver.close()
+        BaseAppTest.tearDown(self)
         
         
         

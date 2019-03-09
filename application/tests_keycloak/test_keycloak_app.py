@@ -3,21 +3,25 @@ import requests
 import json
 import time
 
-from oidc_test import BaseAppTest
+from selenium import webdriver
+from tests_keycloak.oidc_keycloak_config_test import KeycloakBaseTest
 
 
-
-
-class TestOidcKeyCloak(BaseAppTest):
+class TestOidcAppKeycloak(KeycloakBaseTest):
     
     #docker run -e KEYCLOAK_USER= -e KEYCLOAK_PASSWORD=password -p 7010:8080 --detach jboss/test_keycloak
     
     def setUp(self):
         #OIDC Provider
         self.index = 1
-        self.startOidcRp(self.index)
-        super(TestOidcKeyCloak,self).setUp()
+        super(TestOidcAppKeycloak,self).setUp()
         
+        self.startOidcRp(self.index)
+        self.driver = webdriver.Firefox()
+        keycloak_config  = self.loadServerConf('keycloak_client.json')
+        keycloakClientId = self.createKeycloakClient(keycloak_config)
+        
+        print(keycloakClientId + ' started')
     
     def test_authz_request_url(self):
         
@@ -58,6 +62,11 @@ class TestOidcKeyCloak(BaseAppTest):
         self.assertIn('expires_in', response.text)
         self.assertIn('scope', response.text)
         self.assertIn('id_token', response.text)
+        
+        
+    def tearDown(self):
+        self.driver.close()
+        KeycloakBaseTest.tearDown(self)
      
        
         

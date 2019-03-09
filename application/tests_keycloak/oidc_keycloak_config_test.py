@@ -1,14 +1,46 @@
 import os
 import json
+import time
 
 from docker import Client
 from oidc_test import BaseAppTest
+from keycloak import KeycloakAdmin
 
 
 
 class KeycloakBaseTest(BaseAppTest):
     
+    def createKeycloakClient(self,config):
+                
+        print('Creating new oidc client ...')
+        keyclaok_id  = self.keycloak_admin.get_client_id(config['name'])
+        
+        if keyclaok_id is not None : 
+            print('Deleting old client...')
+            self.keycloak_admin.delete_client(keyclaok_id)
+            time.sleep(2)
+        else:
+            print('This client does not exist yet')
+        
+        self.keycloak_admin.create_client(config, skip_exists=True)
+        return self.keycloak_admin.get_client_id(config['name'])
+    
+    def getkeycloakClient(self,clientId):
+        return self.keycloak_admin.get_client(clientId)
+    
+    
+    
+    def deleteKeycloakClient(self,name):   
+        
+        keyclaok_id  = self.keycloak_admin.get_client_id(name)
+        
+        if keyclaok_id is not None : 
+            self.keycloak_admin.delete_client(keyclaok_id)
+            time.sleep(2)
+    
+    
     def startKeycloakAuthorizationServer(self):
+        print('Starting authorization server...')
         #port mapping
         ports = [8080]
         port_bindings = {8080:7010}
@@ -16,34 +48,32 @@ class KeycloakBaseTest(BaseAppTest):
         environment = ['KEYCLOAK_USER='+os.environ['KEYCLOAK_USERNAME'],
                        'KEYCLOAK_PASSWORD='+os.environ['KEYCLOAK_PASSWORD']]
         #image
-        image='jboss/keycloak:latest'
-        #New docker client
-        client = Client()
-            
+        image='jboss/keycloak'
+        #Check is not running
+        keycloak_status = self.isContainerRunning('http://localhost:7010/auth')
         
-        host_config = client.create_host_config(port_bindings=port_bindings)
+        if keycloak_status is not None :
+            return
+        
+        
+        host_config = self.client.create_host_config(port_bindings=port_bindings)
     
-        container = client.create_container(
+        container = self.client.create_container(
             image=image,
             ports=ports,
             host_config=host_config,
             environment=environment
         )
-        client.start(container)
-        
-        self.oidc_rp_id = container['Id']
-        
-        print('Starting container ' + self.oidc_rp_id)
+        self.client.start(container)
         #Give the container the chance to start
-        self.waiContainerRunning(image)
+        self.waiContainerRunning('http://localhost:7010/auth')
 
             
     def stopKeycloakAuthorizationServer(self):
         
-        container_id = self.isContainerRunning('keycloak')
-        
-        if container_id is not None :
-            Client().stop(container_id)
+        for container in self.client.containers():
+            if 'jboss/keycloak' in container['Image']:
+                Client().stop(container['Id'])
         
     
     def loadServerConf(self,config):
@@ -59,12 +89,21 @@ class KeycloakBaseTest(BaseAppTest):
         return data
 
     def setUp(self):
+        
         self.startKeycloakAuthorizationServer()
-        BaseAppTest.setUp(self)
+        super(KeycloakBaseTest,self).setUp()
+        self.keycloak_admin = KeycloakAdmin(server_url="http://localhost:7010/auth/",
+                                        username=os.environ['KEYCLOAK_USERNAME'],
+                                        password=os.environ['KEYCLOAK_PASSWORD'],
+                                        realm_name="master",
+                                        verify=False)
+
+       
         
     def tearDown(self):
+        super(KeycloakBaseTest,self).tearDown()
         self.stopKeycloakAuthorizationServer()
-        BaseAppTest.tearDown(self)
+        
         
 
     

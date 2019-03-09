@@ -1,12 +1,13 @@
 import unittest
-import time
 import requests
+import urllib.request
+import time
 
 
 from docker import Client
 from config import AppConfig
-from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+
 
 
 class BaseAppTest(unittest.TestCase) : 
@@ -15,17 +16,23 @@ class BaseAppTest(unittest.TestCase) :
         super(BaseAppTest, self).__init__(*args, **kwargs)
         #New docker RP client
         self.client = Client()
+        self.oidc_rp_id = None
+        
+    def isAuthServerUp(self,server):
+        
+        try :
+            urllib.request.urlopen(server)
+            return True
+        except: 
+            return False
     
     def isContainerRunning(self,name):
         
         if not isinstance(name,str):
             return None
         
-        for container in self.client.containers() : 
-            if name in container['Image'] :
-                if 'running' in container['State'] :
-                    return container['Id']
-    
+        if self.isAuthServerUp(name):
+            return name
     
         return None
     
@@ -40,9 +47,9 @@ class BaseAppTest(unittest.TestCase) :
             if self.isContainerRunning(name) is None :
                 started = started + 1
                 time.sleep(1)
-                
+                print(name + ' is not running ('+str(started)+')')
                 if started == timeout : 
-                    print(name + ' is not running.')
+                    print(name + ' is not running. Leaving the loop...')
                     break 
             else :
                 print(name + ' is running.')
@@ -90,7 +97,7 @@ class BaseAppTest(unittest.TestCase) :
         
         print('Starting container ' + self.oidc_rp_id)
         #Give the container the chance to start
-        self.waiContainerRunning(tag)
+        self.waiContainerRunning('http://localhost:7011/home')
             
             
     def login(self,index):
@@ -118,17 +125,14 @@ class BaseAppTest(unittest.TestCase) :
             
     def stopOidcRp(self):
         
-        print('Stopping ' + self.oidc_rp_id )
-        self.client.stop(self.oidc_rp_id)
+        if self.oidc_rp_id is not None : 
+            print('Stopping ' + self.oidc_rp_id )
+            self.client.stop(self.oidc_rp_id)
         self.client.close()
             
-            
-    def setUp(self):
-        self.driver = webdriver.Firefox()
         
         
     def tearDown(self):
-        self.driver.close()
         self.stopOidcRp()   
         
         
